@@ -1,31 +1,20 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { fly, scale, slide, blur } from 'svelte/transition';
-	import { backIn, cubicInOut, linear, quintOut } from 'svelte/easing';
 
 	import { cn } from '$lib/utils';
 
-	import {
-		ArrowBigLeft,
-		ChevronDown,
-		ChevronLeft,
-		ChevronRight,
-		ChevronUp,
-		ChevronUpSquare,
-		Dot,
-		MoveLeft
-	} from 'lucide-svelte';
+	import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-svelte';
 	import Button from '$components/ui/button/Button.svelte';
 
 	let className: string | undefined | null = undefined;
 	export { className as class };
 
-	let items = [];
 	export let auto: Boolean = false;
 	export let tick: number = 5000;
-	export let duration: number = 250;
-	export let horizontal = true;
-	let forward = true;
+	export let dots: number = 5;
+	export let horizontal: Boolean = true;
+
+	$: dotcount = Math.floor(dots / 2);
 
 	let index: number = 0;
 	let interval: any;
@@ -42,21 +31,12 @@
 
 	const run = () => {
 		return setInterval(() => {
-			forward = true;
 			if (index === items.length - 1) index = 0;
 			else index++;
 		}, tick);
 	};
 
-	let el = undefined;
-	$: if (el) {
-		if (el.children.length > 0) {
-			items = Object.values(el.children);
-		}
-	}
-
 	const next = () => {
-		forward = true;
 		clearInterval(interval);
 		if (auto) {
 			interval = run();
@@ -66,7 +46,6 @@
 	};
 
 	const back = () => {
-		forward = false;
 		clearInterval(interval);
 		if (auto) {
 			interval = run();
@@ -90,73 +69,94 @@
 		touchxcoord = touch.pageX || touch.clientX;
 	};
 
-	const touchend = (event) => {
-		let touch = event.changedTouches[0];
-		let xcoord = touch.pageX || touch.clientX;
-		let diff = touchxcoord - (touchxcoord - xcoord);
-		// if (diff > -100) next();
-		// else back();
-	};
+	export let items = [];
 </script>
 
-<div class="hidden" bind:this={el}>
-	<slot />
-</div>
+{#if !$$slots.item}
+	<p>no item set</p>
+{/if}
 
-{#if items.length > 0}
-	<div class="gird grid-rows-1">
-		<div class="flex flex-row">
-			<div
-				class={cn('relative overflow-hidden', className)}
-				{...$$restProps}
-				on:touchstart={touchstart}
-				on:touchend={touchend}
-			>
+<div class="gird grid-rows-1">
+	<div class="flex flex-row items-center justify-center">
+		<div
+			class={cn('relative overflow-hidden', className)}
+			{...$$restProps}
+		>
+			{#each items as item, i}
+				{#if i === index}
+					<slot class="absolute" name="item" {item} />
+				{/if}
+			{/each}
+		</div>
+
+		{#if !horizontal && items.length > 0}
+			<div class="flex flex-col p-2 items-center justify-center">
+				<Button variant="ghost" class="flex flex-auto" on:click={() => back()}>
+					<ChevronUp />
+				</Button>
 				{#each items as item, i}
-					{#if i === index}
-						<div class={cn('absolute', className)} transition:blur>
-							{@html item.outerHTML}
-						</div>
-					{/if}
-				{/each}
-			</div>
-
-			{#if !horizontal}
-				<div class="flex flex-col p-2 items-center justify-center">
-					<Button variant="ghost" class="flex flex-auto" on:click={() => back()}>
-						<ChevronUp />
-					</Button>
-					{#each items as item, i}
+					{#if index - dotcount <= 0 && index + dotcount + (index - dotcount) * -1 >= i}
 						<Button
 							href="/"
 							variant={index === i ? 'default' : 'secondary'}
-							class="w-4 h-4 m-0 p-0 rounded-full"
-							on:click={() => select(i)}
-						/>
-					{/each}
-					<Button variant="ghost" class="flex flex-auto" on:click={() => next()}>
-						<ChevronDown />
-					</Button>
-				</div>
-			{/if}
-		</div>
-
-		{#if horizontal}
-			<div class="flex flex-row p-2 items-center justify-center">
-				<Button variant="ghost" class="flex flex-auto" on:click={() => back()}>
-					<ChevronLeft />
-				</Button>
-				{#each items as item, i}
-					<Button
-						variant={index === i ? 'default' : 'secondary'}
-						class="w-4 h-4 m-0 p-0 rounded-full"
-						on:click={() => select(i)}
-					/>
+							class="w-4 h-4 m-1 p-0 rounded-full"
+							on:click={() => select(i)}>{i + 1}</Button
+						>
+					{:else if index + dotcount >= items.length && items.length - 2 - dotcount * 2 < i}
+						<Button
+							href="/"
+							variant={index === i ? 'default' : 'secondary'}
+							class="w-4 h-4 m-1 p-0 rounded-full"
+							on:click={() => select(i)}>{i + 1}</Button
+						>
+					{:else if index - dotcount <= i && index + dotcount >= i}
+						<Button
+							href="/"
+							variant={index === i ? 'default' : 'secondary'}
+							class="w-4 h-4 m-1 p-0 rounded-full"
+							on:click={() => select(i)}>{i + 1}</Button
+						>
+					{/if}
 				{/each}
 				<Button variant="ghost" class="flex flex-auto" on:click={() => next()}>
-					<ChevronRight />
+					<ChevronDown />
 				</Button>
 			</div>
 		{/if}
 	</div>
-{/if}
+
+	{#if horizontal && items.length > 0}
+		<div class="flex flex-row p-2 items-center justify-center">
+			<Button variant="ghost" class="flex flex-auto" on:click={() => back()}>
+				<ChevronLeft />
+			</Button>
+			{#each items as item, i}
+				{#if index - dotcount <= 0 && index + dotcount + (index - dotcount) * -1 >= i}
+					<Button
+						href="/"
+						variant={index === i ? 'default' : 'secondary'}
+						class="w-4 h-4 m-1 p-0 rounded-full"
+						on:click={() => select(i)}>{i + 1}</Button
+					>
+				{:else if index + dotcount >= items.length && items.length - 2 - dotcount * 2 < i}
+					<Button
+						href="/"
+						variant={index === i ? 'default' : 'secondary'}
+						class="w-4 h-4 m-1 p-0 rounded-full"
+						on:click={() => select(i)}>{i + 1}</Button
+					>
+				{:else if index - dotcount <= i && index + dotcount >= i}
+					<Button
+						href="/"
+						variant={index === i ? 'default' : 'secondary'}
+						class="w-4 h-4 m-1 p-0 rounded-full"
+						on:click={() => select(i)}>{i + 1}</Button
+					>
+				{/if}
+			{/each}
+			<Button variant="ghost" class="flex flex-auto" on:click={() => next()}>
+				<ChevronRight />
+			</Button>
+		</div>
+	{/if}
+</div>

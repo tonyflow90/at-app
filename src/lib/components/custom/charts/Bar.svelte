@@ -1,89 +1,56 @@
-<script lang="ts">
-	import { scaleLinear } from 'd3-scale';
+<script>
+	import * as d3 from 'd3';
 
-	let width = 100;
-	let height = 100;
+	export let data;
+	export let width = 640;
+	export let height = 400;
+	export let marginTop = 20;
+	export let marginRight = 20;
+	export let marginBottom = 30;
+	export let marginLeft = 40;
 
-	function formatMobile(tick: number | string) {
-		return "'" + tick.toString().slice(-2);
-	}
+	let gx;
+	let gy;
 
-	$: xScale = scaleLinear()
-		.domain([0, xTicks.length])
-		.range([padding.left, width - padding.right]);
+	const xl = Object.keys(data[0])[0]; // given d in data, returns the (ordinal) x-value
+	const yl = Object.keys(data[0])[1]; // given d in data, returns the (quantitative) y-value
 
-	$: yScale = scaleLinear()
-		.domain([0, Math.max.apply(null, yTicks)])
-		.range([height - padding.bottom, padding.top]);
+	$: reactiveXVals = data.map((el) => el[xl]);
+	$: reactiveYVals = data.map((el) => el[yl]);
 
-	$: innerWidth = width - (padding.left + padding.right);
-	$: barWidth = innerWidth / xTicks.length;
+	// $: x = d3.scaleLinear([0, data.length - 1], [marginLeft, width - marginRight]);
+	// $: y = d3.scaleLinear(d3.extent(data), [height - marginBottom, marginTop]);
 
-	const padding = { top: 20, right: 15, bottom: 20, left: 45 };
+	$: xScale = d3.scaleLinear()
+		.domain([0, reactiveXVals.length])
+		.range([0, 600]);
 
-	type BarChartItem = {
-		name: string;
-		value: number;
-	};
+	$: yScale = d3.scaleLinear()
+		.domain([0, Math.max.apply(null, reactiveYVals)])
+		.range([600, 10]);
 
-	export let data: Array<BarChartItem> = [];
-	export let yTicks: Array<any> = [0, 50, 100];
-	export let xTicks: Array<any> = Array.from(Array(data.length));
+	$: line = d3.line((d, i) => xScale(i), yScale);
+	$: d3.select(gx).call(d3.axisLeft(yScale));
+	$: d3.select(gy).call(d3.axisBottom(xScale));
 </script>
 
-<div class="chart" bind:clientWidth={width} bind:clientHeight={height}>
-	<svg class="w-full">
-		<g class="axis y-axis">
-			{#each yTicks as tick}
-				<g class="text-xs" transform="translate(0, {yScale(tick)})">
-					<text
-						stroke="none"
-						font-size="12"
-						orientation="left"
-						width="60"
-						height="310"
-						x="57"
-						y="-4"
-						fill="#888888"
-						text-anchor="end"><tspan x="36" dy="0.355em">{tick}</tspan></text
-					>
-				</g>
-			{/each}
-		</g>
-
-		<g class="axis x-axis">
-			{#each data as point, i}
-				<g class="text-xs" transform="translate({xScale(i)},{height})">
-					<text
-						stroke="none"
-						font-size="12"
-						orientation="bottom"
-						width="531"
-						height="30"
-						x={barWidth / 2}
-						y="-15"
-						fill="#888888"
-						text-anchor="middle"
-						><tspan x={barWidth / 2} dy="0.71em"
-							>{width > 380 ? point.name : formatMobile(point.name)}</tspan
-						></text
-					>
-				</g>
-			{/each}
-		</g>
-
-		<g>
-			{#each data as point, i}
-				<rect
-					x={xScale(i) + 2}
-					y={yScale(point.value)}
-					width={barWidth - 8}
-					height={yScale(0) - yScale(point.value)}
-					fill="#adfa1d"
-					rx="4"
-					ry="4"
-				/>
-			{/each}
-		</g>
-	</svg>
-</div>
+<svg {width} {height}>
+	<g bind:this={gx} transform="translate(0,{height - marginBottom})" />
+	<g bind:this={gy} transform="translate({marginLeft},0)" />
+	<path fill="none" stroke="currentColor" stroke-width="1.5" d={line(data)} />
+	<g fill="white" stroke="currentColor" stroke-width="1.5">
+		{#each data as d, i}
+			<!-- <circle key={i} cx={x(i)} cy={y(d)} r="2.5" fill="red" />
+			 -->
+			 <rect
+			 x={xScale(i) + 2}
+			 y={yScale(d.value)}
+			 width={20 - 8}
+			 height={yScale(0) - yScale(d.value)}
+			 fill="#adfa1d"
+			 rx="40"
+			 ry="40"
+		 />
+		{/each}
+	</g>
+</svg>

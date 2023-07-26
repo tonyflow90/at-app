@@ -37,6 +37,7 @@
 		"@supabase/auth-helpers-sveltekit": "^0.10.0",
 		"class-variance-authority": "^0.6.0",
 		"clsx": "^1.2.1",
+		"d3": "^7.8.5",
 		"d3-scale": "^4.0.2",
 		"lucide-svelte": "^0.236.0",
 		"radix-svelte": "^0.7.1",

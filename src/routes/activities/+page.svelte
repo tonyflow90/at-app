@@ -27,11 +27,11 @@
 	import { Button } from '$components/ui/button';
 	import type { PageData } from './$types';
 
-	import CreateActivityDialog from '$components/custom/activity/CreateDialog.svelte';
 	import Timer from '$components/custom/timer/Timer.svelte';
 	import Form from '$components/custom/form/Form.svelte';
 	import Bar from '$components/custom/charts/Bar.svelte';
 	import Carousel from '$components/custom/carousel/Carousel.svelte';
+	import BarChart from '$components/custom/charts/BarChart.svelte';
 
 	export let data: PageData;
 
@@ -42,58 +42,91 @@
 		{ key: 'year', name: 'Year', filter: {} },
 		{ key: 'all', name: 'All', filter: {} }
 	];
-	let selectedTab = 'today';
+	let selectedTab = 'running';
 
-	const resolvePromise = async (promise) => {
-		let results = await promise;
+	// const addTimes = (items) => {
+	// 	return items.map((r) => {
+	// 		r.items = r.items.map((i) => {
+	// 			if (i.start && i.end) i['time'] = i.end - i.start;
+	// 			else i['time'] = 0;
+	// 			return i;
+	// 		});
 
-		let activities = {};
-		tabs.forEach((tab) => (activities[tab.key] = []));
+	// 		let times = r.items.map((i) => {
+	// 			return i.time;
+	// 		});
 
-		const cDate = new Date().getDate();
-		const cMonth = new Date().getMonth();
-		const cYear = new Date().getFullYear();
+	// 		if (times.length > 0) r['time'] = times.reduce((x, y) => x + y);
+	// 		else r['time'] = 0;
+	// 		return r;
+	// 	});
+	// };
 
-		activities['running'] = results.filter((a) => a.items.length > 0 && a.items[0].end === null);
-		activities['today'] = results.filter((a) => {
-			if (
-				a.items.length > 0 &&
-				a.items[0].start.getDate() === cDate &&
-				a.items[0].start.getMonth() === cMonth &&
-				a.items[0].start.getFullYear() === cYear
-			) {
-				return true;
-			} else return null;
-		});
+	// const resolvePromise = async (promise) => {
+	// 	let results = await promise;
 
-		activities['month'] = results.filter((a) => {
-			if (
-				a.items.length > 0 &&
-				a.items[0].start.getMonth() === cMonth &&
-				a.items[0].start.getFullYear() === cYear
-			) {
-				return true;
-			} else return null;
-		});
+	// 	let items = addTimes(results);
 
-		activities['year'] = results.filter((a) => {
-			if (a.items.length > 0 && a.items[0].start.getFullYear() === cYear) {
-				return true;
-			} else return null;
-		});
+	// 	let act = {};
+	// 	tabs.forEach((tab) => (act[tab.key] = { items: [], time: 0 }));
 
-		activities['all'] = results.filter((a) => {
-			if (a.items.length > 0) {
-				return true;
-			} else return null;
-		});
+	// 	const cDate = new Date().getDate();
+	// 	const cMonth = new Date().getMonth();
+	// 	const cYear = new Date().getFullYear();
 
-		return activities;
-	};
+	// 	act['running'] = items.filter((a) => a.items.length > 0 && a.items[0].end === null);
 
-	$: activities = resolvePromise(data.activities.result);
+	// 	act['today'] = items.filter((a) => {
+	// 		if (
+	// 			a.items.length > 0 &&
+	// 			a.items[0].start.getDate() === cDate &&
+	// 			a.items[0].start.getMonth() === cMonth &&
+	// 			a.items[0].start.getFullYear() === cYear
+	// 		) {
+	// 			return true;
+	// 		} else return null;
+	// 	});
 
-	let createActivityDialog = undefined;
+	// 	act['month'] = items.filter((a) => {
+	// 		if (
+	// 			a.items.length > 0 &&
+	// 			a.items[0].start.getMonth() === cMonth &&
+	// 			a.items[0].start.getFullYear() === cYear
+	// 		) {
+	// 			return true;
+	// 		} else return null;
+	// 	});
+
+	// 	act['year'] = items.filter((a) => {
+	// 		if (a.items.length > 0 && a.items[0].start.getFullYear() === cYear) {
+	// 			return true;
+	// 		} else return null;
+	// 	});
+
+	// 	act['all'] = items;
+
+	// 	return act;
+	// };
+
+	// $: activities = resolvePromise(data.activities);
+	// $: activitiesWithItems = resolvePromise(data.activitiesWithItems);
+
+	// const makeArray = (items) => {
+	// 	let arr = items.map((i) => {
+	// 		return { title: i.title, time: i.time };
+	// 	});
+	// 	return arr.filter((i) => i.time > 0);
+	// 	// return [
+	// 	// 	{ x: '1', y: 100 },
+	// 	// 	{ x: '2', y: 200 },
+	// 	// 	{ x: '3', y: 200 }
+	// 	// ];
+	// };
+
+	import { blur } from 'svelte/transition';
+
+	import CreateDialog from '$components/CreateDialog.svelte';
+	import Donut from '$components/custom/charts/Donut.svelte';
 </script>
 
 <svelte:head>
@@ -106,87 +139,43 @@
 		<div class="flex items-center justify-between space-y-2">
 			<h2 class="text-xl md:text-3xl font-bold tracking-tight">Activity Dashboard</h2>
 			<div class="flex items-center space-x-2">
-				<CreateActivityDialog />
-				<Button
-					class="rounded-full"
-					variant="ghost"
-					on:click={() => {
-						createActivityDialog.open = true;
-					}}
-				>
-					<Plus />
-				</Button>
-				<dialog bind:this={createActivityDialog}>
-					<p>Greetings, one and all!</p>
-					<form method="dialog">
-						<button>OK</button>
-					</form>
-				</dialog>
+				<CreateDialog />
 			</div>
 		</div>
-		<!-- <Carousel class="w-full h-64" auto={false} horizontal={true}>
-			{#each tabs as tab, i}
-				<Card class="w-full">
-					<CardHeader class="flex">
-						<CardTitle class="text-lg font-medium">{tab.name}</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<Bar />
-					</CardContent>
-				</Card>
-			{/each}
-		</Carousel> -->
 
-		<!-- <Carousel class="w-full h-64" auto={false} horizontal={true}>
-			{#await activities}
-				<Loader2 class="mr-2 h-4 w-4 animate-spin" />
-			{:then activities}
-				{#each tabs as tab, i}
-					<Card class="w-full h-64">
+		<!-- <button
+			style="background-color: red;"
+			on:click={() => (selected = !selected)}
+			in:receive={{ key: 1 }}
+			out:send={{ key: 1 }}
+			>...
+		</button>
+
+		{#if selected}
+			<div
+				on:click={() => (selected = !selected)}
+				class="flex absolute z-50 m-0 p-0 space-y-0 top-0 left-0 w-full h-full bg-orange-600"
+				in:scale
+				out:blur={{ duration: 5000, amount: 5 }}
+			/>
+		{/if} -->
+
+		{#await activities then items}
+			<Carousel items={tabs} auto={false} horizontal={true}>
+				<div slot="item" let:item in:blur>
+					<Card class="w-96">
 						<CardHeader class="flex">
-							<CardTitle class="text-lg font-medium">{tab.name}</CardTitle>
+							<CardTitle class="text-lg font-medium">{item.name}</CardTitle>
 						</CardHeader>
-						<CardContent>
-							<Bar />
+						<CardContent class="flex items-center justify-center w-full h-auto">
+							<Donut class="w-96 h-96" data={makeArray(items[item.key])} />
+							<!-- {#each a[item.key] as i}
+								{i.title}
+								{i.time}
+							{/each} -->
 						</CardContent>
 					</Card>
-				{/each}
-			{:catch error}
-				<p>{error} ...</p>
-			{/await}
-		</Carousel> -->
-
-		<!-- <Card class="w-full h-64">
-			<CardHeader class="flex">
-				<CardTitle class="text-lg font-medium">eee</CardTitle>
-			</CardHeader>
-			<CardContent>
-				hello
-				{#await activities then a}
-					{a['all']}
-
-					{#if activities[tab.key]}
-						{tab.name}
-						<Bar />
-					{/if}
-				{/await}
-			</CardContent>
-		</Card> -->
-
-		{#await activities then a}
-			<Carousel class="w-full h-64" auto={false} horizontal={true}>
-				{#each tabs as tab, i}
-					<Card class="w-full h-64">
-						<CardHeader class="flex">
-							<CardTitle class="text-lg font-medium">{tab.name}</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{#if a[tab.key]}
-								<Bar />
-							{/if}
-						</CardContent>
-					</Card>
-				{/each}
+				</div>
 			</Carousel>
 		{/await}
 
@@ -219,24 +208,21 @@
 											{#if activity.items.length > 0}
 												{#if activity.items[0].start && !activity.items[0].end}
 													<Form
-														action="?/updateActivityItem"
+														action="?/stopActivityItem"
 														data={{ id: activity.items[0].id, end: new Date() }}
 													>
 														<StopCircle />
 													</Form>
-												{:else if !activity.items[0].start && !activity.items[0].end}
+													<!-- {:else if !activity.items[0].start && !activity.items[0].end}
 													<Form
 														action="?/updateActivityItem"
 														data={{ id: activity.items[0].id, start: new Date() }}
 													>
 														<Play />
-													</Form>
+													</Form> -->
 												{:else}
-													<Button class="rounded-full" variant="secondary" disabled>
-														<Check />
-													</Button>
 													<Form
-														action="?/createActivityItem"
+														action="?/startNewActivityItem"
 														data={{ activityId: activity.id, start: new Date() }}
 													>
 														<Plus />
@@ -244,7 +230,7 @@
 												{/if}
 											{:else}
 												<Form
-													action="?/createActivityItem"
+													action="?/startNewActivityItem"
 													data={{ activityId: activity.id, start: new Date() }}
 												>
 													<Plus />

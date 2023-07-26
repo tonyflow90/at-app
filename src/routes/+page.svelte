@@ -10,12 +10,11 @@
 
 	import { Watch } from 'lucide-svelte';
 
-	import CreateActivity from '$components/custom/activity/Create.svelte';
-	import CreateActivityDialog from '$components/custom/activity/CreateDialog.svelte';
-	import Test from '$components/custom/images/Test.svelte';
 	import RollingText from '$components/custom/rollingtext/RollingText.svelte';
 	import Carousel from '$components/custom/carousel/Carousel.svelte';
 	import Separator from '$components/ui/separator/Separator.svelte';
+
+	import { slide } from 'svelte/transition';
 </script>
 
 <svelte:head>
@@ -36,7 +35,7 @@
 				<Watch class="h-4 w-4 text-muted-foreground" />
 			</CardHeader>
 			<CardContent>
-				<CreateActivity />
+				<!-- <CreateActivity /> -->
 			</CardContent>
 		</Card>
 
@@ -44,14 +43,24 @@
 
 		<p class="text-4xl font-bold animate-pulse">Log what you did today!</p>
 
-		<Carousel class="w-full h-40" auto={true} tick={5000} horizontal={true}>
-			{#each ['Log ', 'what', 'you,', 'did', ' today!'] as el, i}
-				<Card class="w-full h-40">
-					<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle class="text-lg font-medium">{el}</CardTitle>
+		<Carousel
+			items={['Log ', 'what', 'you,', 'did', ' today!']}
+			dots={3}
+			auto={true}
+			horizontal={false}
+		>
+			<div slot="item" let:item in:slide={{ axis: 'y' }}>
+				<Card class="w-64">
+					<CardHeader class="flex">
+						<CardTitle class="text-lg font-medium">{item}</CardTitle>
 					</CardHeader>
+					<CardContent>
+						<!-- {#if tabs[item.key]} -->
+						<!-- <Bar data={a[item.key]} /> -->
+						<!-- {/if} -->
+					</CardContent>
 				</Card>
-			{/each}
+			</div>
 		</Carousel>
 	</div>
 </div>

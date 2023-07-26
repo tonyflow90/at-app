@@ -10,6 +10,7 @@
 	import toast from 'svelte-french-toast';
 
 	let isLoading: boolean = false;
+	let msg: string = '';
 
 	const submit: SubmitFunction = ({ formElement, formData, action, cancel, submitter }) => {
 		let data = Object.fromEntries(formData);
@@ -18,15 +19,21 @@
 			isLoading = false;
 			switch (result.type) {
 				case 'success':
-					toast.success(successMessage);
+					msg = result?.data?.message ? result.data.message : successMessage;
+					toast.success(msg);
+					break;
+				case 'error':
+					msg = result?.error?.message ? result.error.message : errorMessage;
+					toast.error(msg);
 					break;
 				case 'failure':
-					toast.error(errorMessage);
+					msg = result?.data?.message ? result.data.message : errorMessage;
+					toast.error(msg);
 					break;
 				default:
 					break;
 			}
-			await update();
+			await update({ reset: result.type === 'failure' ? false : true });
 		};
 	};
 
@@ -46,8 +53,7 @@
 	<Button type="submit" variant="ghost" disabled={isLoading}>
 		{#if isLoading}
 			<Loader2 class="mr-2 h-4 w-4 animate-spin" />
-		{/if}
-		{#if $$slots.default}
+		{:else if $$slots.default}
 			<slot />
 		{:else}
 			Action

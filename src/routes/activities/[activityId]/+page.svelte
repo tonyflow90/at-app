@@ -30,7 +30,7 @@
 	import CreateActivityDialog from '$components/custom/activity/CreateDialog.svelte';
 	import Timer from '$components/custom/timer/Timer.svelte';
 	import Form from '$components/custom/form/Form.svelte';
-	import Bar from '$components/custom/charts/Bar.svelte';
+	import Bar from '$components/custom/charts/Bar2.svelte';
 	import Carousel from '$components/custom/carousel/Carousel.svelte';
 
 	export let data: PageData;
@@ -176,7 +176,7 @@
 		{#await activities then a}
 			<Carousel class="w-full h-64" auto={false} horizontal={true}>
 				{#each tabs as tab, i}
-					<Card class="w-full h-64">
+					<Card class="w-full h-64" let:items={tabs}>
 						<CardHeader class="flex">
 							<CardTitle class="text-lg font-medium">{tab.name}</CardTitle>
 						</CardHeader>
@@ -190,7 +190,7 @@
 			</Carousel>
 		{/await}
 
-		<Tabs bind:value={selectedTab} class="space-y-4">
+		<!-- <Tabs bind:value={selectedTab} class="space-y-4">
 			<TabsList>
 				{#each tabs as tab, i}
 					<TabsTrigger value={tab.key}>
@@ -272,6 +272,6 @@
 			{:catch error}
 				<p>{error} ...</p>
 			{/await}
-		</Tabs>
+		</Tabs> -->
 	</div>
 </div>
