@@ -1,24 +1,8 @@
 import { invalidate } from "$app/navigation";
 import { getAll, getAllActivities } from "$lib/db/activity";
-import { create, read, readAll } from "$lib/prisma/tables/activity.js";
-import { createItem, updateItem } from "$lib/prisma/tables/item";
 import type { PageServerLoad } from "./$types";
 import { fail } from "@sveltejs/kit";
 
-
-// let getFristDay = (year, month) => {
-//     return new Date(year, month, 1);
-// }
-// let getLastDay = (year, month) => {
-//     return new Date(year, month + 1, 0);
-// }
-// const filter1 = { end: { not: null } }
-// const filter2 = {
-//     start: {
-//         lte: getFristDay(2023, 7),
-//         gte: getLastDay(2023, 7),
-//     }
-// }
 
 
 export const load: PageServerLoad = async ({ locals: { supabase } }) => {

@@ -15,7 +15,6 @@ export async function load({ params }) {
 }
 
 // import type { PageServerLoad } from "./$types";
-// import { addActivity, getActivitiesWithRunningItem, getActivitiesWithLatestItem, addActivityItem, updateActivityItem } from "$lib/prisma/methods";
 
 // export const load: PageServerLoad = async (event) => {
 //     return {

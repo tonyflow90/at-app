@@ -14,8 +14,8 @@
 		CardTitle
 	} from '$components/ui/card';
 
-	import Signin from '$components/custom/authentication/Signin.svelte';
 	import { base } from '$app/paths';
+	import Signin from '$components/custom/authentication/Signin.svelte';
 </script>
 
 <svelte:head>

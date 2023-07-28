@@ -13,6 +13,7 @@
 	const submit = ({ formElement, formData, action, cancel, submitter }) => {
 		isLoading = true;
 		return async ({ result, update }) => {
+			debugger
 			isLoading = false;
 			switch (result.type) {
 				case 'success':

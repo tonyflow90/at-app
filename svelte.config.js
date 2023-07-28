@@ -18,7 +18,7 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$components: 'src/lib/components',
-			'$components/*': 'src/lib/components/*'
+			$db: 'src/lib/db',
 		}
 	},
 	shadcn: {
