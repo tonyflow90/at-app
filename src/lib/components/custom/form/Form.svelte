@@ -1,19 +1,16 @@
-<script lang="ts">
+<script>
 	import { enhance } from '$app/forms';
 	import { Loader2 } from 'lucide-svelte';
 	import { Input } from '$components/ui/input';
 	import { Label } from '$components/ui/label';
 	import { Button } from '$components/ui/button';
 
-	import type { SubmitFunction } from './$types';
-
 	import toast from 'svelte-french-toast';
 
-	let isLoading: boolean = false;
-	let msg: string = '';
+	let isLoading = false;
+	let msg = '';
 
-	const submit: SubmitFunction = ({ formElement, formData, action, cancel, submitter }) => {
-		let data = Object.fromEntries(formData);
+	const submit = ({ formElement, formData, action, cancel, submitter }) => {
 		isLoading = true;
 		return async ({ result, update }) => {
 			isLoading = false;
@@ -37,10 +34,12 @@
 		};
 	};
 
-	export let data: any = {};
+	export let data = {};
 	export let action = 'action';
 	export let successMessage = 'action';
 	export let errorMessage = 'Error action';
+	export let variant = 'ghost';
+	export let disabled = false;
 </script>
 
 <form class="grid gap-2" method="POST" {action} use:enhance={submit}>
@@ -50,7 +49,7 @@
 		</Label>
 	{/each}
 
-	<Button type="submit" variant="ghost" disabled={isLoading}>
+	<Button type="submit" {variant} disabled={disabled || isLoading}>
 		{#if isLoading}
 			<Loader2 class="mr-2 h-4 w-4 animate-spin" />
 		{:else if $$slots.default}

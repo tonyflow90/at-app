@@ -5,7 +5,8 @@ export const load: LayoutServerLoad = async ({ url, locals: { getSession } }) =>
   const session = await getSession();
   if (!session) {
     const path = url.pathname;
-    if (path != '/authentication') throw redirect(302, '/authentication');
+    
+    if (!path.includes('/authentication')) throw redirect(302, '/authentication');
     else return {}
   }
 

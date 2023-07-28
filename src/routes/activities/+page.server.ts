@@ -1,37 +1,42 @@
+import { invalidate } from "$app/navigation";
+import { getAll, getAllActivities } from "$lib/db/activity";
+import { create, read, readAll } from "$lib/prisma/tables/activity.js";
+import { createItem, updateItem } from "$lib/prisma/tables/item";
 import type { PageServerLoad } from "./$types";
-import { addActivity, getAllActivities, getActivitiesWithLatestItem, addActivityItem, updateActivityItem } from "$lib/prisma/methods";
 import { fail } from "@sveltejs/kit";
-import { getAllWithFilter } from "$lib/prisma/tables/Item";
 
 
-let getFristDay = (year, month) => {
-    return new Date(year, month, 1);
-}
-let getLastDay = (year, month) => {
-    return new Date(year, month + 1, 0);
-}
-const filter1 = { end: { not: null } }
-const filter2 = {
-    start: {
-        lte: getFristDay(2023, 7),
-        gte: getLastDay(2023, 7),
-    }
-}
+// let getFristDay = (year, month) => {
+//     return new Date(year, month, 1);
+// }
+// let getLastDay = (year, month) => {
+//     return new Date(year, month + 1, 0);
+// }
+// const filter1 = { end: { not: null } }
+// const filter2 = {
+//     start: {
+//         lte: getFristDay(2023, 7),
+//         gte: getLastDay(2023, 7),
+//     }
+// }
 
 
-export const load: PageServerLoad = async (event) => {
+export const load: PageServerLoad = async ({ locals: { supabase } }) => {
     return {
+        activities: loadActivities(supabase),
         activitiesWithItems: loadActivitiesWithItems(),
-        activities: loadActivities(),
-        items1: getAllWithFilter(filter1),
-        items2: getAllWithFilter(filter2),
     };
 };
 
-const loadActivities = async () => {
+const loadActivitiesWithItems = async () => {
     return new Promise(async (res, rej) => {
         try {
-            let results = await getAllActivities()
+            console.log('reload with items hello');
+
+            let include = {
+                items: true
+            };
+            let results = await read({ include })
             res(results)
         } catch (error) {
             rej(error)
@@ -39,16 +44,13 @@ const loadActivities = async () => {
     });
 }
 
-const loadActivitiesWithItems = async () => {
+const loadActivities = async (supabaseClient) => {
     return new Promise(async (res, rej) => {
         try {
-            let results = await getActivitiesWithLatestItem()
-
-            let promises = []
-            results.forEach(res => {
-                res.items = getAllWithFilter({ activityId: res.id })
-                // promises.push(getAllWithFilter({ activitiyId: res.id }))
-            });
+            // let results = await readAll();
+            let results = await getAllActivities(supabaseClient);
+            console.log(results);
+            
             res(results)
         } catch (error) {
             rej(error)
@@ -57,30 +59,19 @@ const loadActivitiesWithItems = async () => {
 }
 
 export const actions: Actions = {
-    createActivity: async ({ request }) => {
-        const data = await request.formData();
-        const { title } = Object.fromEntries(data);
+    updateActivityItem: async ({ request }) => {
+        const formData = await request.formData();
+        const { id, end } = Object.fromEntries(formData);
 
-        if (!title) return fail(500, { message: 'no title' })
+        if (!id) return fail(500, { message: 'no item id' })
+        if (!end) return fail(500, { message: 'no start date' })
 
-        let error = await addActivity(data);
-        console.log(error);
-
-        if (error) fail(500, { message: error })
-
-        return {
-            status: 201, message: 'creating new activity'
+        let itemData = {
+            ...(end && { end: new Date(end) }),
         };
-    },
-    createActivityItem: async ({ request }) => addActivityItem(await request.formData()),
-    stopActivityItem: async ({ request }) => {
-        const data = await request.formData();
-        const { id, end } = Object.fromEntries(data);
-
-        if (!id) return fail(500, { message: 'no id' })
-        if (!end) return fail(500, { message: 'no end date' })
-
-        let error = await updateActivityItem(data);
+        let item = await updateItem(id, itemData);
+        const { error } = item;
+        if (error) fail(500, { message: error })
 
         if (error) fail(500, { message: error })
 
@@ -88,15 +79,19 @@ export const actions: Actions = {
             status: 201, message: 'activity item stopped'
         };
     },
-    startNewActivityItem: async ({ request }) => {
-        const data = await request.formData();
-        const { id, start } = Object.fromEntries(data);
+    createActivityItem: async ({ request }) => {
+        const formData = await request.formData();
+        const { activityId, start } = Object.fromEntries(formData);
 
-        // if (!id) return fail(500, { message: 'no id' })
+        if (!activityId) return fail(500, { message: 'no activity id' })
         if (!start) return fail(500, { message: 'no start date' })
 
-        let error = await addActivityItem(data);
-
+        let itemData = {
+            ...(activityId && { activityId }),
+            ...(start && { start: new Date(start) }),
+        };
+        let item = await createItem(itemData);
+        const { error } = item;
         if (error) fail(500, { message: error })
 
         return {

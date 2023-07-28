@@ -14,23 +14,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 };
 
 export const actions: Actions = {
-    signin: async ({ locals, request }) => {
-        const data = await request.formData();
-        const { email, password } = Object.fromEntries(data);
-
-        if (!email) return fail(500, { message: 'email is required' })
-        if (!password) return fail(500, { message: 'password is required' })
-        const { error } = await locals.supabase.auth.signInWithPassword({ email, password });
-        console.log(error);
-
-        if (error) {
-            if (error?.message) return fail(500, { message: error.message })
-            return fail(500, { message: error })
-        }
-        return {
-            status: 201, message: 'signin success'
-        };
-    },
     signup: async ({ request }) => {
         const data = await request.formData();
         const { email, password } = Object.fromEntries(data);
@@ -38,7 +21,6 @@ export const actions: Actions = {
         if (!email) return fail(500, { message: 'email is required' })
         if (!password) return fail(500, { message: 'password is required' })
         const { error } = await locals.supabase.auth.signUp({ email, password });
-        console.log(error);
 
         if (error) {
             if (error?.message) return fail(500, { message: error.message })

@@ -4,23 +4,22 @@
 	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	import type { LayoutData } from './$types';
-
 	import { Toaster } from 'svelte-french-toast';
 
-	export let data: LayoutData;
+	export let data;
 
-	$: ({ supabase } = data);
+	let { supabase, session } = data
+	$: ({ supabase, session } = data)
 
 	onMount(() => {
-		const {
-			data: { subscription }
-		} = supabase.auth.onAuthStateChange(() => {
-			invalidate('supabase:auth');
-		});
+		const { data } = supabase.auth.onAuthStateChange((event, _session) => {
+			if (_session?.expires_at !== session?.expires_at) {
+				invalidate('supabase:auth')
+			}
+		})
 
-		return () => subscription.unsubscribe();
-	});
+		return () => data.subscription.unsubscribe()
+	})
 
 	import Header from '$components/custom/header/Header.svelte';
 
@@ -29,8 +28,8 @@
 	$: webManifestLink = pwaInfo ? pwaInfo.webManifest.linkTag : '';
 
 	import { browser } from '$app/environment';
-	import RollingText from '$components/custom/rollingtext/RollingText.svelte';
-	import { Card, CardContent, CardHeader, CardTitle } from '$components/ui/card';
+
+	import StartActivity from '$components/StartActivity.svelte';
 
 	let head = undefined,
 		body = undefined,
@@ -60,20 +59,10 @@
 
 <Toaster />
 
-<div>
-	<Header {data} />
-
-	<!-- <Card>
-		<CardContent class="justify-items-center items-center w-full overflow-hidden p-8 h-64 text-4xl font-bold">
-			<RollingText
-				class="justify-items-center items-center w-full text-4xl font-bold"
-				text={['What', 'did you', 'eat', 'today?']}
-				tick="1500"
-			/>
-		</CardContent>
-	</Card> -->
-
-	<main>
+<Header {data} />
+<main class="flex justify-center">
+	<div class="flex w-full max-w-2xl">
+		<StartActivity />
 		<slot />
-	</main>
-</div>
+	</div>
+</main>

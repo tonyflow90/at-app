@@ -27,8 +27,8 @@ export const load: LayoutLoad = async ({ url, fetch, data, depends }) => {
 
   if (!session) {
     const path = url.pathname;
-    if (path != '/authentication') throw redirect(302, '/authentication');
-    else   return { data, supabase, session: undefined };
+    if (!path.includes('/authentication')) throw redirect(302, '/authentication');
+    else return { data, supabase, session: undefined };
   }
 
   return { data, supabase, session };

@@ -1,8 +1,8 @@
 import prisma from '$lib/prisma/prisma';
 
-const table = 'activity';
+export let table = 'activity';
 
-export let createActivity = async (data) => {
+export async function create({ data }) {
 	return new Promise(async (res, rej) => {
 		try {
 			let result = await prisma[table].create({
@@ -13,33 +13,23 @@ export let createActivity = async (data) => {
 			rej(error);
 		}
 	});
-};
+}
 
-export let readAll = async () => {
-	return new Promise(async (res, rej) => {
-		try {
-			let result = await prisma[table].findMany();
-			res(result);
-		} catch (error) {
-			rej(error);
-		}
-	});
-};
-export let read = async ({ where, include }) => {
+export async function read({ where }) {
 	return new Promise(async (res, rej) => {
 		try {
 			let result = await prisma[table].findMany({
 				where,
-				include
+				data
 			});
 			res(result);
 		} catch (error) {
 			rej(error);
 		}
 	});
-};
+}
 
-export let update = async ({ where, data }) => {
+export async function update({ where, data }) {
 	return new Promise(async (res, rej) => {
 		try {
 			let result = await prisma[table].update({
@@ -51,9 +41,9 @@ export let update = async ({ where, data }) => {
 			rej(error);
 		}
 	});
-};
+}
 
-export let remove = async ({ where }) => {
+export async function delete({ where }) {
 	return new Promise(async (res, rej) => {
 		try {
 			let result = await prisma[table].delete({
@@ -65,4 +55,4 @@ export let remove = async ({ where }) => {
 			rej(error);
 		}
 	});
-};
+}

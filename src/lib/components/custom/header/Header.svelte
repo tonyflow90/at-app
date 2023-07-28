@@ -26,24 +26,25 @@
 	import DarkmodeButton from '$components/custom/darkmode/DarkmodeButton.svelte';
 
 	import { routes } from '$lib/routes';
+	import SignOut from '../authentication/SignOut.svelte';
 
 	export let data: LayoutData;
 </script>
 
 <header class="w-full h-16 md:h-24 flex">
-	<start class="flex-none flex h-full items-center align-middle">
+	<start class="flex-none flex h-full items-center align-middle pl-2">
 		<div class="grid grid-flow-col gap-2">
 			<Sheet>
 				<SheetTrigger>
 					{#if data.session}
-						<Button class="felx md:hidden pl-8" variant="ghost">
+						<Button class="felx md:hidden" variant="ghost">
 							<Menu />
 						</Button>
 					{/if}
 				</SheetTrigger>
 				<SheetContent class="flex flex-col" position="left" size="full">
 					<SheetHeader class="flex-none h-16 md:h-24" />
-					<nav class="flex-auto grid-flow-row flex flex-col space-y-6 ">
+					<nav class="flex-auto grid-flow-row flex flex-col space-y-6">
 						{#each routes as route}
 							<SheetClose>
 								<a
@@ -56,17 +57,17 @@
 							</SheetClose>
 						{/each}
 					</nav>
-					<SheetFooter class="w-full flex flex-row justify-items-center items-center" >
+					<SheetFooter class="w-full flex flex-row justify-items-center items-center">
 						<!-- <div class="w-full flex justify-items-stretch"> -->
-							<Button href="https://google.com" variant="link">
-								<Github />
-							</Button>
-							<Button href="https://google.com" variant="link">
-								<Instagram />
-							</Button>
-							<Button href="https://google.com" variant="link">
-								<Twitter />
-							</Button>
+						<!-- <Button href="https://google.com" variant="link">
+							<Github />
+						</Button>
+						<Button href="https://google.com" variant="link">
+							<Instagram />
+						</Button>
+						<Button href="https://google.com" variant="link">
+							<Twitter />
+						</Button> -->
 						<!-- </div> -->
 					</SheetFooter>
 				</SheetContent>
@@ -95,9 +96,9 @@
 			</nav>
 		{/if}
 	</middle>
-	<end class="flex-none flex h-full items-center align-middle">
+	<end class="flex-none flex h-full items-center align-middle pr-2">
 		<div class="grid grid-flow-col gap-2">
-			<div class="items-center hidden md:flex">
+			<!-- <div class="items-center hidden md:flex">
 				<Button href="https://google.com" variant="link">
 					<Github />
 				</Button>
@@ -109,7 +110,7 @@
 				</Button>
 
 				<Separator orientation="vertical" />
-			</div>
+			</div> -->
 
 			<Sheet>
 				<SheetTrigger>
@@ -128,9 +129,9 @@
 					</div>
 				</SheetTrigger>
 				<SheetContent class="flex flex-col" position="right" size="content">
-					<SheetHeader class="flex-none h-16 md:h-24" >
+					<SheetHeader class="flex-none h-16 md:h-24">
 						<SheetTitle>
-							<div class="items-center flex">
+							<!-- <div class="items-center flex">
 								{#if data.session && data.session.user}
 									{#if data.session.user.image}
 										<Avatar className="h-8 w-8">
@@ -141,18 +142,34 @@
 									{/if}
 									{data.session.user.user_metadata.name}
 								{/if}
-							</div>
+							</div> -->
 						</SheetTitle>
 						<SheetDescription>
-							<div class="items-center flex">
+							<!-- <div class="items-center flex">
 								{#if data.session && data.session.user}
 									{data.session.user.email}
 									{data.session.user.last_sign_in_at}
 								{/if}
-							</div>
+							</div> -->
 						</SheetDescription>
 					</SheetHeader>
-					<nav class="flex-auto grid-flow-row flex flex-col space-y-6 ">
+					<div class="flex-auto flex flex-col space-y-6">
+						{#if data.session && data.session.user}
+							{#if data.session.user.image}
+								<Avatar class="w-full h-full">
+									<AvatarImage src={data.session.user.image} alt="profile image" />
+								</Avatar>
+							{:else}
+								<User class="w-full h-full" />
+							{/if}
+						{/if}
+						{#if data.session && data.session.user}
+							{data.session.user.email}
+							{data.session.user.last_sign_in_at}
+						{/if}
+					</div>
+
+					<!-- <nav class="flex-auto grid-flow-row flex flex-col space-y-6">
 						{#each routes as route}
 							<SheetClose>
 								<a
@@ -164,12 +181,16 @@
 								</a>
 							</SheetClose>
 						{/each}
-					</nav>
+					</nav> -->
 					<SheetFooter />
 				</SheetContent>
 			</Sheet>
 
 			<DarkmodeButton />
+
+			{#if data.session}
+				<SignOut />
+			{/if}
 		</div>
 	</end>
 </header>

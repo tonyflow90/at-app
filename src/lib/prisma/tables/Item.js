@@ -1,5 +1,35 @@
 import prisma from '$lib/prisma/prisma';
 
+const table = 'item';
+
+export let updateItem = async (id, data) => {
+	return new Promise(async (res, rej) => {
+		try {
+			let result = await prisma[table].update({
+				where: {
+					id
+				},
+				data
+			});
+			res(result);
+		} catch (error) {
+			rej(error);
+		}
+	});
+};
+
+export let createItem = async (data) => {
+	return new Promise(async (res, rej) => {
+		try {
+			let result = await prisma[table].create({
+				data
+			});
+			res(result);
+		} catch (error) {
+			rej(error);
+		}
+	});
+};
 // return await prisma.journalTransactions.findMany({
 //     where: {
 //       date: {
@@ -24,10 +54,10 @@ export async function get(id) {
 	});
 }
 
-export async function getLatest(activityId) {
+export async function getLatestItem(activityId) {
 	return new Promise(async (res, rej) => {
 		try {
-			let results = await prisma.activity.findFirst({
+			let results = await prisma.item.findFirst({
 				where: {
 					activityId
 				},
@@ -59,10 +89,10 @@ export async function getAllWithFilter(filter) {
 	return new Promise(async (res, rej) => {
 		try {
 			let results = await prisma.item.findMany({
-                where: {
-                    ...filter
-                }
-            });
+				where: {
+					...filter
+				}
+			});
 			res(results);
 		} catch (error) {
 			rej(error);
@@ -70,7 +100,7 @@ export async function getAllWithFilter(filter) {
 	});
 }
 
-export async function addActivityItem(data) {
+export async function create(data) {
 	return new Promise(async (res, rej) => {
 		try {
 			const { activityId, start } = Object.fromEntries(data);

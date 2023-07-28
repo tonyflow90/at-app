@@ -8,18 +8,25 @@ datasource db {
 }
 
 model Item {
-  id         BigInt    @id @default(autoincrement())
-  activityId BigInt?
-  created    DateTime  @default(now()) @db.Timestamptz(6)
-  start      DateTime? @db.Timestamptz(6)
-  end        DateTime? @db.Timestamptz(6)
-  Activity   Activity? @relation(fields: [activityId], references: [id])
+  id                                      BigInt     @id @default(autoincrement())
+  activityId                              BigInt?
+  created                                 DateTime   @default(now()) @db.Timestamptz(6)
+  start                                   DateTime?  @db.Timestamptz(6)
+  end                                     DateTime?  @db.Timestamptz(6)
+  time                                    DateTime?  @db.Time(6)
+  Activity_Activity_current_item_idToItem Activity[] @relation("Activity_current_item_idToItem")
+  Activity                                Activity?  @relation(fields: [activityId], references: [id], onUpdate: NoAction)
 }
 
 model Activity {
-  id      BigInt   @id @default(autoincrement())
-  title   String
-  created DateTime @default(now()) @db.Timestamptz(6)
-  creator String?
-  items   Item[]
+  id                                  BigInt    @id @default(autoincrement())
+  title                               String
+  created                             DateTime  @default(now()) @db.Timestamptz(6)
+  creator                             String?
+  time                                DateTime? @db.Time(6)
+  running                             Boolean   @default(false)
+  latest_start                        DateTime? @db.Timestamptz(6)
+  current_item_id                     BigInt?
+  Item_Activity_current_item_idToItem Item?     @relation("Activity_current_item_idToItem", fields: [current_item_id], references: [id], onUpdate: NoAction)
+  items                               Item[]
 }

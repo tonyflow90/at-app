@@ -5,7 +5,7 @@ export async function getAllActivities() {
         try {
             let results = await prisma.activity.findMany({
                 include: {
-                    items: true
+                    items: false
                 }
             });
             res(results)
